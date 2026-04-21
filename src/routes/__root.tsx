@@ -30,14 +30,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Tic Tac Toe Extreme Online" },
+      { name: "description", content: "Play tic tac toe extreme locally or online! play locally on the same device with a friend, or create/join a room to play online!" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Tic Tac Toe Extreme Online" },
+      { property: "og:description", content: "Play tic tac toe extreme locally or online! play locally on the same device with a friend, or create/join a room to play online!" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Tic Tac Toe Extreme Online" },
+      { name: "twitter:description", content: "Play tic tac toe extreme locally or online! play locally on the same device with a friend, or create/join a room to play online!" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44e08e33-a9f7-4df0-a345-337a35ea9dac/id-preview-d3e7b631--80aa4b43-5166-42ea-a6b8-a97c868d0b03.lovable.app-1776796140571.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44e08e33-a9f7-4df0-a345-337a35ea9dac/id-preview-d3e7b631--80aa4b43-5166-42ea-a6b8-a97c868d0b03.lovable.app-1776796140571.png" },
     ],
     links: [
       {
