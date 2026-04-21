@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      games: {
+        Row: {
+          active_board: number | null
+          board_state: Json
+          created_at: string
+          current_player: string
+          id: string
+          mini_winners: Json
+          move_count: number
+          room_id: string
+          updated_at: string
+          winner: string | null
+        }
+        Insert: {
+          active_board?: number | null
+          board_state: Json
+          created_at?: string
+          current_player?: string
+          id?: string
+          mini_winners: Json
+          move_count?: number
+          room_id: string
+          updated_at?: string
+          winner?: string | null
+        }
+        Update: {
+          active_board?: number | null
+          board_state?: Json
+          created_at?: string
+          current_player?: string
+          id?: string
+          mini_winners?: Json
+          move_count?: number
+          room_id?: string
+          updated_at?: string
+          winner?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          draws: number
+          id: string
+          losses: number
+          nickname: string
+          updated_at: string
+          wins: number
+        }
+        Insert: {
+          created_at?: string
+          draws?: number
+          id: string
+          losses?: number
+          nickname?: string
+          updated_at?: string
+          wins?: number
+        }
+        Update: {
+          created_at?: string
+          draws?: number
+          id?: string
+          losses?: number
+          nickname?: string
+          updated_at?: string
+          wins?: number
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          player_o_id: string | null
+          player_o_name: string | null
+          player_o_token: string | null
+          player_x_id: string | null
+          player_x_name: string
+          player_x_token: string | null
+          status: string
+          updated_at: string
+          winner: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          player_o_id?: string | null
+          player_o_name?: string | null
+          player_o_token?: string | null
+          player_x_id?: string | null
+          player_x_name?: string
+          player_x_token?: string | null
+          status?: string
+          updated_at?: string
+          winner?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          player_o_id?: string | null
+          player_o_name?: string | null
+          player_o_token?: string | null
+          player_x_id?: string | null
+          player_x_name?: string
+          player_x_token?: string | null
+          status?: string
+          updated_at?: string
+          winner?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
