@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RulesRouteImport } from './routes/rules'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayOnlineRouteImport } from './routes/play.online'
 import { Route as PlayLocalRouteImport } from './routes/play.local'
 
 const RulesRoute = RulesRouteImport.update({
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayOnlineRoute = PlayOnlineRouteImport.update({
+  id: '/play/online',
+  path: '/play/online',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayLocalRoute = PlayLocalRouteImport.update({
   id: '/play/local',
   path: '/play/local',
@@ -33,30 +39,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/rules': typeof RulesRoute
   '/play/local': typeof PlayLocalRoute
+  '/play/online': typeof PlayOnlineRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/rules': typeof RulesRoute
   '/play/local': typeof PlayLocalRoute
+  '/play/online': typeof PlayOnlineRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/rules': typeof RulesRoute
   '/play/local': typeof PlayLocalRoute
+  '/play/online': typeof PlayOnlineRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/rules' | '/play/local'
+  fullPaths: '/' | '/rules' | '/play/local' | '/play/online'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/rules' | '/play/local'
-  id: '__root__' | '/' | '/rules' | '/play/local'
+  to: '/' | '/rules' | '/play/local' | '/play/online'
+  id: '__root__' | '/' | '/rules' | '/play/local' | '/play/online'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RulesRoute: typeof RulesRoute
   PlayLocalRoute: typeof PlayLocalRoute
+  PlayOnlineRoute: typeof PlayOnlineRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play/online': {
+      id: '/play/online'
+      path: '/play/online'
+      fullPath: '/play/online'
+      preLoaderRoute: typeof PlayOnlineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/play/local': {
       id: '/play/local'
       path: '/play/local'
@@ -89,7 +106,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RulesRoute: RulesRoute,
   PlayLocalRoute: PlayLocalRoute,
+  PlayOnlineRoute: PlayOnlineRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
