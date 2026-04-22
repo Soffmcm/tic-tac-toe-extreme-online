@@ -16,6 +16,8 @@ import { sfx } from "@/lib/sounds";
 interface PlayerInfo {
   name: string;
   player: Player;
+  /** Optional custom symbol/emoji to render in place of X or O. */
+  symbol?: string | null;
 }
 
 interface GameViewProps {
