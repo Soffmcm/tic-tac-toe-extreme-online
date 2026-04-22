@@ -73,7 +73,6 @@ function BotPlay() {
   const [difficulty, setDifficulty] = useState<BotDifficulty>("medium");
   const [humanSeat, setHumanSeat] = useState<Player>("X");
   const [state, setState] = useState<GameState>(() => createInitialState());
-  const [botThinking, setBotThinking] = useState(false);
   const botTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const botSeat: Player = humanSeat === "X" ? "O" : "X";
@@ -92,7 +91,6 @@ function BotPlay() {
     if (state.winner !== null) return;
     if (state.currentPlayer !== botSeat) return;
 
-    setBotThinking(true);
     // Small artificial delay so moves feel deliberate, scaled by difficulty.
     const baseDelay =
       difficulty === "easy" ? 350
@@ -107,12 +105,10 @@ function BotPlay() {
         const next = applyMove(state, move.boardIndex, move.cellIndex);
         if (next) setState(next);
       }
-      setBotThinking(false);
     }, baseDelay + jitter);
 
     return () => {
       if (botTimer.current) clearTimeout(botTimer.current);
-      setBotThinking(false);
     };
   }, [started, state, botSeat, difficulty]);
 
