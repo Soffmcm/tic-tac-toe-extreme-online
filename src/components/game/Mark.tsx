@@ -7,8 +7,6 @@ interface MarkProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   animate?: boolean;
-  /** Optional custom symbol/emoji to render instead of the default X/O strokes. */
-  symbol?: string | null;
 }
 
 const sizes = {
@@ -18,13 +16,6 @@ const sizes = {
   xl: "w-24 h-24 sm:w-32 sm:h-32",
 };
 
-const symbolTextSizes = {
-  sm: "text-base",
-  md: "text-2xl",
-  lg: "text-4xl",
-  xl: "text-6xl sm:text-7xl",
-};
-
 const stroke = {
   sm: 4,
   md: 5,
@@ -32,31 +23,9 @@ const stroke = {
   xl: 8,
 };
 
-export function Mark({ player, size = "md", className, animate = true, symbol }: MarkProps) {
+export function Mark({ player, size = "md", className, animate = true }: MarkProps) {
   const color = player === "X" ? "var(--player-x)" : "var(--player-o)";
   const sw = stroke[size];
-
-  // Custom symbol path: render the chosen character/emoji centered, tinted with the player color.
-  if (symbol && symbol.trim().length > 0) {
-    return (
-      <motion.span
-        role="img"
-        aria-label={`${player}: ${symbol}`}
-        className={cn(
-          sizes[size],
-          symbolTextSizes[size],
-          "inline-flex items-center justify-center font-display font-bold leading-none select-none",
-          className,
-        )}
-        style={{ color }}
-        initial={animate ? { scale: 0, rotate: -20 } : false}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 380, damping: 18 }}
-      >
-        {symbol}
-      </motion.span>
-    );
-  }
 
   return (
     <motion.svg

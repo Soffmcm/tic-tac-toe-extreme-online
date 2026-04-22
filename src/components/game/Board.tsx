@@ -4,11 +4,6 @@ import type { GameState, MiniBoardResult, Player } from "@/lib/game-engine";
 import { isLegalMove } from "@/lib/game-engine";
 import { Mark } from "./Mark";
 
-export interface PlayerSymbols {
-  X?: string | null;
-  O?: string | null;
-}
-
 interface BoardProps {
   state: GameState;
   /** Player whose moves should be allowed from this client. Null = read-only. */
@@ -17,8 +12,6 @@ interface BoardProps {
   onMove?: (boardIndex: number, cellIndex: number) => void;
   /** Visually disable interactions (e.g., waiting for opponent). */
   disabled?: boolean;
-  /** Optional custom symbols to substitute for the X/O glyphs. */
-  symbols?: PlayerSymbols;
 }
 
 function isBoardActive(state: GameState, boardIndex: number): boolean {
@@ -28,7 +21,7 @@ function isBoardActive(state: GameState, boardIndex: number): boolean {
   return state.activeBoard === boardIndex;
 }
 
-function MiniBoardOverlay({ result, symbol }: { result: MiniBoardResult; symbol?: string | null }) {
+function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
   if (result === null) return null;
   if (result === "draw") {
     return (
@@ -53,7 +46,7 @@ function MiniBoardOverlay({ result, symbol }: { result: MiniBoardResult; symbol?
         bg,
       )}
     >
-      <Mark player={result} size="xl" symbol={symbol} />
+      <Mark player={result} size="xl" />
     </motion.div>
   );
 }
@@ -70,7 +63,7 @@ function MiniBoardOverlay({ result, symbol }: { result: MiniBoardResult; symbol?
  *   - All lines are perfectly straight: no rounded corners anywhere on
  *     cells, mini-boards, or the outer container.
  */
-export function Board({ state, playerSeat, onMove, disabled = false, symbols }: BoardProps) {
+export function Board({ state, playerSeat, onMove, disabled = false }: BoardProps) {
   const myTurn = playerSeat === undefined ? true : playerSeat === state.currentPlayer;
   const interactive = !disabled && state.winner === null && (playerSeat === undefined || myTurn);
 
@@ -107,13 +100,7 @@ export function Board({ state, playerSeat, onMove, disabled = false, symbols }: 
             )}
           >
             <AnimatePresence>
-              {result !== null && (
-                <MiniBoardOverlay
-                  key="overlay"
-                  result={result}
-                  symbol={result === "X" ? symbols?.X : result === "O" ? symbols?.O : null}
-                />
-              )}
+              {result !== null && <MiniBoardOverlay key="overlay" result={result} />}
             </AnimatePresence>
 
             {/* The mini-board itself: 3x3 of cells, only INTERIOR thin lines.
@@ -161,16 +148,11 @@ export function Board({ state, playerSeat, onMove, disabled = false, symbols }: 
                     aria-label={`Mini-board ${boardIndex + 1}, cell ${cellIndex + 1}`}
                   >
                     {cell ? (
-                      <Mark player={cell} size="md" symbol={symbols?.[cell]} />
+                      <Mark player={cell} size="md" />
                     ) : (
                       legal && (
                         <span className="opacity-0 group-hover:opacity-25 transition-opacity">
-                          <Mark
-                            player={state.currentPlayer}
-                            size="md"
-                            animate={false}
-                            symbol={symbols?.[state.currentPlayer]}
-                          />
+                          <Mark player={state.currentPlayer} size="md" animate={false} />
                         </span>
                       )
                     )}

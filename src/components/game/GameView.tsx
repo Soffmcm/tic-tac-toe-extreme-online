@@ -16,8 +16,6 @@ import { sfx } from "@/lib/sounds";
 interface PlayerInfo {
   name: string;
   player: Player;
-  /** Optional custom symbol/emoji to render in place of X or O. */
-  symbol?: string | null;
 }
 
 interface GameViewProps {
@@ -88,7 +86,6 @@ export function GameView({
 
   const turnPlayer = state.currentPlayer;
   const turnInfo = turnPlayer === "X" ? playerX : playerO;
-  const symbols = { X: playerX.symbol ?? null, O: playerO.symbol ?? null };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -107,14 +104,12 @@ export function GameView({
               score={scores.X}
               isTurn={turnPlayer === "X" && !state.winner}
               isMe={mySeat === "X"}
-              symbol={symbols.X}
             />
             <ScoreCard
               info={playerO}
               score={scores.O}
               isTurn={turnPlayer === "O" && !state.winner}
               isMe={mySeat === "O"}
-              symbol={symbols.O}
             />
           </div>
         </div>
@@ -138,7 +133,7 @@ export function GameView({
               animate={{ y: 0, opacity: 1 }}
               className="flex items-center gap-2 text-sm sm:text-base font-bold"
             >
-              <Mark player={turnPlayer} size="sm" animate={false} symbol={symbols[turnPlayer]} />
+              <Mark player={turnPlayer} size="sm" animate={false} />
               <span>
                 {mySeat && mySeat === turnPlayer ? (
                   <span className="text-primary">Your turn</span>
@@ -163,7 +158,6 @@ export function GameView({
           playerSeat={mySeat ?? undefined}
           onMove={onMove}
           disabled={!!waitingForOpponent}
-          symbols={symbols}
         />
 
         {/* Bottom controls */}
@@ -225,11 +219,7 @@ export function GameView({
               ) : (
                 <>
                   <div className="flex justify-center mb-3">
-                    <Mark
-                      player={state.winner}
-                      size="xl"
-                      symbol={state.winner === "X" ? symbols.X : symbols.O}
-                    />
+                    <Mark player={state.winner} size="xl" />
                   </div>
                   <h2 className="font-display text-3xl font-bold mb-2">
                     {(state.winner === "X" ? playerX.name : playerO.name)} wins!
@@ -268,13 +258,11 @@ function ScoreCard({
   score,
   isTurn,
   isMe,
-  symbol,
 }: {
   info: PlayerInfo;
   score: number;
   isTurn: boolean;
   isMe?: boolean;
-  symbol?: string | null;
 }) {
   const isX = info.player === "X";
   return (
@@ -283,7 +271,7 @@ function ScoreCard({
         isX ? "bg-player-x-soft" : "bg-player-o-soft"
       } ${isTurn ? "ring-2 ring-offset-1 ring-offset-background scale-[1.02] " + (isX ? "ring-player-x" : "ring-player-o") : "opacity-80"}`}
     >
-      <Mark player={info.player} size="sm" animate={false} symbol={symbol} />
+      <Mark player={info.player} size="sm" animate={false} />
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-bold text-foreground/60 leading-none">
           {isMe ? "You" : "Player"}
