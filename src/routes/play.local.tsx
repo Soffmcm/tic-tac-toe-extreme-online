@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
 import { GameView } from "@/components/game/GameView";
+import {
+  SymbolPicker,
+  DEFAULT_SYMBOLS_X,
+  DEFAULT_SYMBOLS_O,
+} from "@/components/game/SymbolPicker";
 import { applyMove, createInitialState, type GameState } from "@/lib/game-engine";
 
 export const Route = createFileRoute("/play/local")({
