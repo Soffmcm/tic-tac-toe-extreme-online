@@ -70,7 +70,7 @@ function MiniBoardOverlay({ result, symbol }: { result: MiniBoardResult; symbol?
  *   - All lines are perfectly straight: no rounded corners anywhere on
  *     cells, mini-boards, or the outer container.
  */
-export function Board({ state, playerSeat, onMove, disabled = false }: BoardProps) {
+export function Board({ state, playerSeat, onMove, disabled = false, symbols }: BoardProps) {
   const myTurn = playerSeat === undefined ? true : playerSeat === state.currentPlayer;
   const interactive = !disabled && state.winner === null && (playerSeat === undefined || myTurn);
 
