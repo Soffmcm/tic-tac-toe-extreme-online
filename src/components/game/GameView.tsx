@@ -161,6 +161,7 @@ export function GameView({
           playerSeat={mySeat ?? undefined}
           onMove={onMove}
           disabled={!!waitingForOpponent}
+          symbols={symbols}
         />
 
         {/* Bottom controls */}
