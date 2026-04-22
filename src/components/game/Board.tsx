@@ -107,7 +107,13 @@ export function Board({ state, playerSeat, onMove, disabled = false, symbols }: 
             )}
           >
             <AnimatePresence>
-              {result !== null && <MiniBoardOverlay key="overlay" result={result} />}
+              {result !== null && (
+                <MiniBoardOverlay
+                  key="overlay"
+                  result={result}
+                  symbol={result === "X" ? symbols?.X : result === "O" ? symbols?.O : null}
+                />
+              )}
             </AnimatePresence>
 
             {/* The mini-board itself: 3x3 of cells, only INTERIOR thin lines.
