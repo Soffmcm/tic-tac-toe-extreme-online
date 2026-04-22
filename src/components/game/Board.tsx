@@ -92,20 +92,27 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
           <div
             key={boardIndex}
             className={cn(
-              "relative transition-colors",
+              "relative",
               metaBorders,
               // Inset so the mini-grid's outer edges sit AWAY from the
-              // thick lines and the outer edge. p-3/p-4 is the visual gap.
+              // thick lines and the outer edge.
               "p-3 sm:p-4",
-              highlight && "bg-secondary/25",
             )}
           >
             <AnimatePresence>
               {result !== null && <MiniBoardOverlay key="overlay" result={result} />}
             </AnimatePresence>
 
-            {/* The mini-board itself: 3x3 of cells, only INTERIOR thin lines. */}
-            <div className="relative grid grid-cols-3 grid-rows-3 w-full h-full">
+            {/* The mini-board itself: 3x3 of cells, only INTERIOR thin lines.
+                When this mini-board is the next legal target, it "pops":
+                slightly scaled up + bolder/darker grid lines. */}
+            <div
+              className={cn(
+                "relative grid grid-cols-3 grid-rows-3 w-full h-full",
+                "transition-transform duration-200 ease-out origin-center",
+                highlight && "scale-[1.06] sm:scale-[1.08]",
+              )}
+            >
               {cells.map((cell, cellIndex) => {
                 const legal =
                   interactive && isLegalMove(state, boardIndex, cellIndex);
@@ -114,9 +121,15 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
                 const cRow = Math.floor(cellIndex / 3);
 
                 // THIN mini-grid: only interior dividers (no outer mini frame).
+                // When the mini-board is "active", lines get bolder + darker.
                 const cellBorders = cn(
-                  cCol > 0 && "border-l border-l-board-line/60",
-                  cRow > 0 && "border-t border-t-board-line/60",
+                  cCol > 0 && (highlight
+                    ? "border-l-2 border-l-board-line"
+                    : "border-l border-l-board-line/60"),
+                  cRow > 0 && (highlight
+                    ? "border-t-2 border-t-board-line"
+                    : "border-t border-t-board-line/60"),
+                  "transition-[border-color,border-width] duration-200",
                 );
 
                 return (
