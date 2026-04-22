@@ -4,11 +4,16 @@ import { Header } from "@/components/game/Header";
 import { GameView } from "@/components/game/GameView";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { getRoomClient } from "@/integrations/supabase/room-client";
-import { getSeatToken, getStoredNickname, setStoredNickname } from "@/lib/identity";
+import { getStoredNickname, setStoredNickname } from "@/lib/identity";
+import { getCallerIdentity } from "@/lib/api-client";
+import {
+  joinRoomFn,
+  makeMoveFn,
+  resetGameFn,
+  getMySeatFn,
+} from "@/server/game.functions";
 import {
   applyMove,
-  createInitialState,
   type Cell,
   type GameState,
   type MiniBoardResult,
@@ -37,11 +42,9 @@ interface RoomRow {
   status: string;
   player_x_id: string | null;
   player_o_id: string | null;
-  player_x_token: string | null;
-  player_o_token: string | null;
   player_x_name: string;
   player_o_name: string | null;
-  winner: "X" | "O" | "draw" | null;
+  winner: string | null;
 }
 
 interface GameRow {
@@ -77,41 +80,22 @@ function OnlineGame() {
   const [game, setGame] = useState<GameRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [authedUserId, setAuthedUserId] = useState<string | null>(null);
+  const [mySeat, setMySeat] = useState<Player | null>(null);
+  const seatLoadedRef = useRef(false);
 
-  const seatToken = useMemo(() => getSeatToken(), []);
-  const seatTokenRef = useRef(seatToken);
-
-  // Determine my seat in the room.
-  const mySeat: Player | null = useMemo(() => {
-    if (!room) return null;
-    if (authedUserId) {
-      if (room.player_x_id === authedUserId) return "X";
-      if (room.player_o_id === authedUserId) return "O";
-    }
-    if (room.player_x_token && room.player_x_token === seatTokenRef.current) return "X";
-    if (room.player_o_token && room.player_o_token === seatTokenRef.current) return "O";
-    return null;
-  }, [room, authedUserId]);
-
-  const isSpectator = !mySeat && !!room && !!room.player_o_id || !!room?.player_o_token;
-  const oSeatTaken = !!room?.player_o_id || !!room?.player_o_token;
+  const oSeatTaken = !!room?.player_o_id || !!room?.player_o_name;
   const waitingForOpponent = !!room && !oSeatTaken;
 
-  // Initial fetch + auth check + realtime subscriptions.
+  // Initial fetch + identity check + realtime subscriptions.
   useEffect(() => {
     let cancelled = false;
     let roomChannel: ReturnType<typeof supabase.channel> | null = null;
     let gameChannel: ReturnType<typeof supabase.channel> | null = null;
 
     (async () => {
-      const { data: sess } = await supabase.auth.getSession();
-      if (cancelled) return;
-      setAuthedUserId(sess.session?.user?.id ?? null);
-
       const { data: r, error: rErr } = await supabase
         .from("rooms")
-        .select("*")
+        .select("id,code,status,player_x_id,player_o_id,player_x_name,player_o_name,winner")
         .eq("code", roomCode)
         .maybeSingle();
       if (cancelled) return;
@@ -129,9 +113,21 @@ function OnlineGame() {
         .maybeSingle();
       if (cancelled) return;
       if (g) setGame(g as unknown as GameRow);
+
+      // Ask the server which seat (if any) we hold.
+      try {
+        const identity = await getCallerIdentity();
+        const seatRes = await getMySeatFn({ data: { roomId: r.id, ...identity } });
+        if (!cancelled) {
+          setMySeat(seatRes.seat);
+          seatLoadedRef.current = true;
+        }
+      } catch (err) {
+        console.error("seat lookup failed:", err);
+      }
+
       setLoading(false);
 
-      // Subscribe to realtime updates for this room and game.
       roomChannel = supabase
         .channel(`room:${r.id}`)
         .on(
@@ -162,32 +158,34 @@ function OnlineGame() {
     };
   }, [roomCode]);
 
-  // Watch auth changes too.
+  // Re-check seat ownership when auth state changes.
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setAuthedUserId(session?.user?.id ?? null);
+    const { data: sub } = supabase.auth.onAuthStateChange(async () => {
+      if (!room) return;
+      try {
+        const identity = await getCallerIdentity();
+        const seatRes = await getMySeatFn({ data: { roomId: room.id, ...identity } });
+        setMySeat(seatRes.seat);
+      } catch {
+        // ignore
+      }
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [room]);
 
   const claimOSeat = async (name: string) => {
     if (!room) return;
     setStoredNickname(name);
-    const client = getRoomClient(seatTokenRef.current);
-    const { data: updated, error } = await client
-      .from("rooms")
-      .update({
-        player_o_id: authedUserId,
-        player_o_token: authedUserId ? null : seatTokenRef.current,
-        player_o_name: name,
-        status: "playing",
-      })
-      .eq("id", room.id)
-      .is("player_o_token", null)
-      .is("player_o_id", null)
-      .select()
-      .maybeSingle();
-    if (error || !updated) {
+    try {
+      const identity = await getCallerIdentity();
+      await joinRoomFn({
+        data: { roomId: room.id, nickname: name, ...identity },
+      });
+      // Refresh seat info.
+      const seatRes = await getMySeatFn({ data: { roomId: room.id, ...identity } });
+      setMySeat(seatRes.seat);
+    } catch (e) {
+      console.error(e);
       toast.error("Couldn't join — the seat may already be taken.");
     }
   };
@@ -199,7 +197,8 @@ function OnlineGame() {
     const next = applyMove(current, boardIndex, cellIndex);
     if (!next) return;
 
-    // Optimistic update
+    // Optimistic update — server will overwrite via realtime if it disagrees.
+    const prevGame = game;
     setGame((g) =>
       g
         ? {
@@ -214,51 +213,33 @@ function OnlineGame() {
         : g,
     );
 
-    const client = getRoomClient(seatTokenRef.current);
-    const { error } = await client
-      .from("games")
-      .update({
-        board_state: next.boards,
-        mini_winners: next.miniWinners,
-        current_player: next.currentPlayer,
-        active_board: next.activeBoard,
-        winner: next.winner,
-        move_count: game.move_count + 1,
-      })
-      .eq("id", game.id)
-      .eq("move_count", game.move_count); // optimistic concurrency
-    if (error) {
-      console.error(error);
+    try {
+      const identity = await getCallerIdentity();
+      await makeMoveFn({
+        data: {
+          roomId: room.id,
+          expectedMoveCount: game.move_count,
+          boardIndex,
+          cellIndex,
+          ...identity,
+        },
+      });
+    } catch (err) {
+      console.error(err);
       toast.error("Move rejected — refreshing.");
-    }
-
-    if (next.winner) {
-      await client
-        .from("rooms")
-        .update({ status: "finished", winner: next.winner })
-        .eq("id", room.id);
+      setGame(prevGame);
     }
   };
 
   const newGame = async () => {
-    if (!room || !game) return;
-    const init = createInitialState();
-    const client = getRoomClient(seatTokenRef.current);
-    await client
-      .from("games")
-      .update({
-        board_state: init.boards,
-        mini_winners: init.miniWinners,
-        current_player: "X",
-        active_board: null,
-        winner: null,
-        move_count: 0,
-      })
-      .eq("id", game.id);
-    await client
-      .from("rooms")
-      .update({ status: "playing", winner: null })
-      .eq("id", room.id);
+    if (!room) return;
+    try {
+      const identity = await getCallerIdentity();
+      await resetGameFn({ data: { roomId: room.id, ...identity } });
+    } catch (e) {
+      console.error(e);
+      toast.error("Couldn't start a new game.");
+    }
   };
 
   if (loading) {

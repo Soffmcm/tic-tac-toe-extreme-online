@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
 import { supabase } from "@/integrations/supabase/client";
-import { getRoomClient } from "@/integrations/supabase/room-client";
 import {
   generateRoomCode,
-  getSeatToken,
   getStoredNickname,
   setStoredNickname,
 } from "@/lib/identity";
-import { createInitialState } from "@/lib/game-engine";
+import { getCallerIdentity } from "@/lib/api-client";
+import { createRoomFn } from "@/server/game.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/play/online")({
@@ -62,37 +61,13 @@ function OnlineLobby() {
     setStoredNickname(name);
     setCreating(true);
 
-    const seatToken = getSeatToken();
-    const client = getRoomClient(seatToken);
-    const code = generateRoomCode();
-    const initial = createInitialState();
-
     try {
-      const { data: room, error: roomErr } = await client
-        .from("rooms")
-        .insert({
-          code,
-          status: "waiting",
-          player_x_id: authedUser?.id ?? null,
-          player_x_token: authedUser ? null : seatToken,
-          player_x_name: name,
-        })
-        .select()
-        .single();
-      if (roomErr || !room) throw roomErr ?? new Error("Failed to create room");
-
-      const { error: gameErr } = await client.from("games").insert({
-        room_id: room.id,
-        board_state: initial.boards,
-        mini_winners: initial.miniWinners,
-        current_player: "X",
-        active_board: null,
-        winner: null,
-        move_count: 0,
+      const code = generateRoomCode();
+      const identity = await getCallerIdentity();
+      const result = await createRoomFn({
+        data: { code, nickname: name, ...identity },
       });
-      if (gameErr) throw gameErr;
-
-      navigate({ to: "/play/$roomCode", params: { roomCode: code } });
+      navigate({ to: "/play/$roomCode", params: { roomCode: result.code } });
     } catch (e) {
       console.error(e);
       toast.error("Couldn't create room. Try again.");
@@ -109,7 +84,7 @@ function OnlineLobby() {
     try {
       const { data: room, error } = await supabase
         .from("rooms")
-        .select("id, code, player_x_id, player_o_id, player_x_token, player_o_token, status")
+        .select("id, code, status")
         .eq("code", code)
         .maybeSingle();
       if (error || !room) {
@@ -161,7 +136,11 @@ function OnlineLobby() {
             {!authedUser && (
               <p className="text-xs text-muted-foreground mt-2">
                 Playing as a guest.{" "}
-                <Link to="/auth" className="text-primary font-semibold hover:underline">
+                <Link
+                  to="/auth"
+                  search={{ mode: "signin" }}
+                  className="text-primary font-semibold hover:underline"
+                >
                   Sign in
                 </Link>{" "}
                 to track your wins.
