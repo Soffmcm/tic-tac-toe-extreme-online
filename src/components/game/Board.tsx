@@ -4,6 +4,11 @@ import type { GameState, MiniBoardResult, Player } from "@/lib/game-engine";
 import { isLegalMove } from "@/lib/game-engine";
 import { Mark } from "./Mark";
 
+export interface PlayerSymbols {
+  X?: string | null;
+  O?: string | null;
+}
+
 interface BoardProps {
   state: GameState;
   /** Player whose moves should be allowed from this client. Null = read-only. */
@@ -12,6 +17,8 @@ interface BoardProps {
   onMove?: (boardIndex: number, cellIndex: number) => void;
   /** Visually disable interactions (e.g., waiting for opponent). */
   disabled?: boolean;
+  /** Optional custom symbols to substitute for the X/O glyphs. */
+  symbols?: PlayerSymbols;
 }
 
 function isBoardActive(state: GameState, boardIndex: number): boolean {
