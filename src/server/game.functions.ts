@@ -57,8 +57,8 @@ export const createRoomFn = createServerFn({ method: "POST" })
     }
     const { data: rows, error } = await supabaseAdmin.rpc("create_room_secure", {
       _code: data.code,
-      _user_id: userId,
-      _seat_token: seatToken,
+      _user_id: userId ?? (null as unknown as string),
+      _seat_token: seatToken ?? (null as unknown as string),
       _nickname: data.nickname,
     });
     if (error) {
@@ -82,8 +82,8 @@ export const joinRoomFn = createServerFn({ method: "POST" })
     }
     const { error } = await supabaseAdmin.rpc("join_room_secure", {
       _room_id: data.roomId,
-      _user_id: userId,
-      _seat_token: seatToken,
+      _user_id: userId ?? (null as unknown as string),
+      _seat_token: seatToken ?? (null as unknown as string),
       _nickname: data.nickname,
     });
     if (error) {
@@ -117,8 +117,8 @@ export const makeMoveFn = createServerFn({ method: "POST" })
       _expected_move_count: data.expectedMoveCount,
       _board_index: data.boardIndex,
       _cell_index: data.cellIndex,
-      _user_id: userId,
-      _seat_token: seatToken,
+      _user_id: userId ?? (null as unknown as string),
+      _seat_token: seatToken ?? (null as unknown as string),
     });
     if (error) {
       console.error("make_move_secure error:", error);
@@ -138,8 +138,8 @@ export const resetGameFn = createServerFn({ method: "POST" })
     }
     const { error } = await supabaseAdmin.rpc("reset_game_secure", {
       _room_id: data.roomId,
-      _user_id: userId,
-      _seat_token: seatToken,
+      _user_id: userId ?? (null as unknown as string),
+      _seat_token: seatToken ?? (null as unknown as string),
     });
     if (error) {
       console.error("reset_game_secure error:", error);
