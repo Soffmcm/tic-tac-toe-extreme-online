@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Sparkles, Users, Globe } from "lucide-react";
+import { Sparkles, Users, Globe, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
@@ -97,6 +97,17 @@ function Home() {
                 <Link to="/play/local">
                   <Users className="!size-5" />
                   Play Local
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-14 px-8 text-base font-bold rounded-2xl border-2 hover:scale-105 transition-transform"
+              >
+                <Link to="/play/bot">
+                  <Bot className="!size-5" />
+                  Play vs Bot
                 </Link>
               </Button>
             </motion.div>
