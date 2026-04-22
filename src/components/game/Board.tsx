@@ -161,11 +161,16 @@ export function Board({ state, playerSeat, onMove, disabled = false, symbols }: 
                     aria-label={`Mini-board ${boardIndex + 1}, cell ${cellIndex + 1}`}
                   >
                     {cell ? (
-                      <Mark player={cell} size="md" />
+                      <Mark player={cell} size="md" symbol={symbols?.[cell]} />
                     ) : (
                       legal && (
                         <span className="opacity-0 group-hover:opacity-25 transition-opacity">
-                          <Mark player={state.currentPlayer} size="md" animate={false} />
+                          <Mark
+                            player={state.currentPlayer}
+                            size="md"
+                            animate={false}
+                            symbol={symbols?.[state.currentPlayer]}
+                          />
                         </span>
                       )
                     )}
