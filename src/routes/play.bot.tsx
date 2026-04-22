@@ -161,7 +161,7 @@ function BotPlay() {
 
             {/* Name */}
             <div className="rounded-2xl bg-muted/50 p-4 flex items-center gap-3 mb-5">
-              <Mark player={humanSeat} size="md" animate={false} />
+              <Mark player={humanSeat} size="md" animate={false} symbol={humanSymbol} />
               <div className="flex-1">
                 <Label htmlFor="botPlayerName" className="text-xs font-bold uppercase text-foreground/60">
                   Your name
@@ -186,7 +186,16 @@ function BotPlay() {
                   <button
                     key={p}
                     type="button"
-                    onClick={() => setHumanSeat(p)}
+                    onClick={() => {
+                      setHumanSeat(p);
+                      // Reset symbol to a sensible default for the new seat,
+                      // unless the user already picked a custom one.
+                      const defaults = p === "X" ? DEFAULT_SYMBOLS_X : DEFAULT_SYMBOLS_O;
+                      const otherDefaults = p === "X" ? DEFAULT_SYMBOLS_O : DEFAULT_SYMBOLS_X;
+                      if ((otherDefaults as readonly string[]).includes(humanSymbol)) {
+                        setHumanSymbol(defaults[0]);
+                      }
+                    }}
                     className={cn(
                       "flex items-center justify-center gap-2 rounded-2xl py-3 font-bold transition-all",
                       p === "X" ? "bg-player-x-soft" : "bg-player-o-soft",
@@ -197,10 +206,21 @@ function BotPlay() {
                     )}
                   >
                     <Mark player={p} size="sm" animate={false} />
-                    <span>{p === "X" ? "X (first)" : "O (second)"}</span>
+                    <span>{p === "X" ? "First" : "Second"}</span>
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Symbol picker */}
+            <div className="rounded-2xl bg-muted/50 p-4 mb-5">
+              <SymbolPicker
+                value={humanSymbol}
+                onChange={setHumanSymbol}
+                options={humanSymbolOptions}
+                ringClass={humanRingClass}
+                label="Your symbol"
+              />
             </div>
 
             {/* Difficulty */}
