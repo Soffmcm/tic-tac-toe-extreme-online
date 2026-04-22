@@ -68,7 +68,9 @@ export function SymbolPicker({
             "h-9 w-12 rounded-xl border border-dashed border-border",
             "bg-background/70 text-center text-base font-bold",
             "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-background",
-            ringClass.replace("ring-", "focus:ring-"),
+            ringClass === "ring-player-x" && "focus:ring-player-x",
+            ringClass === "ring-player-o" && "focus:ring-player-o",
+            ringClass === "ring-primary" && "focus:ring-primary",
           )}
           aria-label="Custom symbol"
         />
