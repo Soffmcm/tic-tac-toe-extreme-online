@@ -107,12 +107,14 @@ export function GameView({
               score={scores.X}
               isTurn={turnPlayer === "X" && !state.winner}
               isMe={mySeat === "X"}
+              symbol={symbols.X}
             />
             <ScoreCard
               info={playerO}
               score={scores.O}
               isTurn={turnPlayer === "O" && !state.winner}
               isMe={mySeat === "O"}
+              symbol={symbols.O}
             />
           </div>
         </div>
