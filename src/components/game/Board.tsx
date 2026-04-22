@@ -29,7 +29,7 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="absolute inset-0 z-10 flex items-center justify-center bg-muted/85 backdrop-blur-[1px]"
+        className="absolute inset-0 z-10 flex items-center justify-center bg-muted/85 backdrop-blur-[1px] rounded-lg"
       >
         <span className="font-display text-3xl font-bold text-muted-foreground">—</span>
       </motion.div>
@@ -42,7 +42,7 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
       animate={{ scale: 1, rotate: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 280, damping: 16 }}
       className={cn(
-        "absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[1px]",
+        "absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[1px] rounded-lg",
         bg,
       )}
     >
@@ -52,11 +52,11 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
 }
 
 /**
- * Classical Ultimate Tic-Tac-Toe board.
- * - One outer square holding a 3×3 meta-grid drawn with THICK lines.
- * - Each mini-board is a 3×3 of cells with THINNER lines.
- * - Lines are achieved with borders so the look is clean and classical,
- *   not a stack of tinted tiles.
+ * Classical Ultimate Tic-Tac-Toe board — drawn as overlapping line grids.
+ * No outer frame and no per-cell boxes. Only:
+ *   - thick meta-grid lines forming the 3x3 of mini-boards
+ *   - thin mini-grid lines forming the 3x3 of cells inside each mini-board
+ * Marks sit directly on the background, like pencil on paper.
  */
 export function Board({ state, playerSeat, onMove, disabled = false }: BoardProps) {
   const myTurn = playerSeat === undefined ? true : playerSeat === state.currentPlayer;
@@ -65,10 +65,9 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
   return (
     <div
       className={cn(
-        "relative grid grid-cols-3 grid-rows-3 bg-board rounded-xl overflow-hidden",
+        "relative grid grid-cols-3 grid-rows-3",
         "aspect-square w-full max-w-[min(92vw,640px)]",
-        // Outer frame — thick, classical
-        "border-[3px] sm:border-4 border-board-line shadow-pop",
+        "p-2 sm:p-3",
       )}
     >
       {state.boards.map((cells, boardIndex) => {
@@ -79,20 +78,20 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
         const col = boardIndex % 3;
         const row = Math.floor(boardIndex / 3);
 
-        // Thick meta-grid lines drawn as borders between mini-boards.
+        // THICK meta-grid lines: drawn only between mini-boards (no outer frame).
         const metaBorders = cn(
-          col > 0 && "border-l-[3px] sm:border-l-4 border-l-board-line",
-          row > 0 && "border-t-[3px] sm:border-t-4 border-t-board-line",
+          col > 0 && "border-l-[5px] sm:border-l-[6px] border-l-board-line",
+          row > 0 && "border-t-[5px] sm:border-t-[6px] border-t-board-line",
         );
 
         return (
           <div
             key={boardIndex}
             className={cn(
-              "relative grid grid-cols-3 grid-rows-3 bg-board transition-colors",
+              "relative grid grid-cols-3 grid-rows-3 transition-colors",
               metaBorders,
-              highlight && "bg-secondary/25",
-              !highlight && result === null && interactive && "bg-board",
+              // Soft tint on the active mini-board only — no border, no box.
+              highlight && "bg-secondary/25 rounded-md",
             )}
           >
             <AnimatePresence>
@@ -106,10 +105,10 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
               const cCol = cellIndex % 3;
               const cRow = Math.floor(cellIndex / 3);
 
-              // Thin mini-grid lines between cells within the mini-board.
+              // THIN mini-grid lines: only between cells (no outer mini frame).
               const cellBorders = cn(
-                cCol > 0 && "border-l border-l-board-line/40",
-                cRow > 0 && "border-t border-t-board-line/40",
+                cCol > 0 && "border-l border-l-board-line/55",
+                cRow > 0 && "border-t border-t-board-line/55",
               );
 
               return (
