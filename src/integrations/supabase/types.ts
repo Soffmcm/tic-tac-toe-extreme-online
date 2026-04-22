@@ -91,6 +91,47 @@ export type Database = {
         }
         Relationships: []
       }
+      room_seats: {
+        Row: {
+          created_at: string
+          id: string
+          nickname: string
+          room_id: string
+          seat: string
+          token: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nickname?: string
+          room_id: string
+          seat: string
+          token?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nickname?: string
+          room_id?: string
+          seat?: string
+          token?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_seats_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rooms: {
         Row: {
           code: string
@@ -98,10 +139,8 @@ export type Database = {
           id: string
           player_o_id: string | null
           player_o_name: string | null
-          player_o_token: string | null
           player_x_id: string | null
           player_x_name: string
-          player_x_token: string | null
           status: string
           updated_at: string
           winner: string | null
@@ -112,10 +151,8 @@ export type Database = {
           id?: string
           player_o_id?: string | null
           player_o_name?: string | null
-          player_o_token?: string | null
           player_x_id?: string | null
           player_x_name?: string
-          player_x_token?: string | null
           status?: string
           updated_at?: string
           winner?: string | null
@@ -126,10 +163,8 @@ export type Database = {
           id?: string
           player_o_id?: string | null
           player_o_name?: string | null
-          player_o_token?: string | null
           player_x_id?: string | null
           player_x_name?: string
-          player_x_token?: string | null
           status?: string
           updated_at?: string
           winner?: string | null
@@ -143,6 +178,32 @@ export type Database = {
     Functions: {
       current_seat_token: { Args: never; Returns: string }
       is_room_player: { Args: { _room_id: string }; Returns: boolean }
+      make_move_secure: {
+        Args: {
+          _board_index: number
+          _cell_index: number
+          _expected_move_count: number
+          _room_id: string
+        }
+        Returns: {
+          active_board: number | null
+          board_state: Json
+          created_at: string
+          current_player: string
+          id: string
+          mini_winners: Json
+          move_count: number
+          room_id: string
+          updated_at: string
+          winner: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "games"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
