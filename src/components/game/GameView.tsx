@@ -225,7 +225,11 @@ export function GameView({
               ) : (
                 <>
                   <div className="flex justify-center mb-3">
-                    <Mark player={state.winner} size="xl" />
+                    <Mark
+                      player={state.winner}
+                      size="xl"
+                      symbol={state.winner === "X" ? symbols.X : symbols.O}
+                    />
                   </div>
                   <h2 className="font-display text-3xl font-bold mb-2">
                     {(state.winner === "X" ? playerX.name : playerO.name)} wins!
