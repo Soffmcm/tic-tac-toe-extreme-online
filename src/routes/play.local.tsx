@@ -60,36 +60,54 @@ function LocalPlay() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-2xl bg-player-x-soft p-4 flex items-center gap-3">
-                <Mark player="X" size="md" animate={false} />
-                <div className="flex-1">
-                  <Label htmlFor="nameX" className="text-xs font-bold uppercase text-foreground/60">
-                    Player X
-                  </Label>
-                  <Input
-                    id="nameX"
-                    value={nameX}
-                    maxLength={20}
-                    onChange={(e) => setNameX(e.target.value)}
-                    className="border-0 bg-transparent shadow-none px-0 text-base font-bold focus-visible:ring-0"
-                  />
+              <div className="rounded-2xl bg-player-x-soft p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Mark player="X" size="md" animate={false} symbol={symbolX} />
+                  <div className="flex-1">
+                    <Label htmlFor="nameX" className="text-xs font-bold uppercase text-foreground/60">
+                      Player 1
+                    </Label>
+                    <Input
+                      id="nameX"
+                      value={nameX}
+                      maxLength={20}
+                      onChange={(e) => setNameX(e.target.value)}
+                      className="border-0 bg-transparent shadow-none px-0 text-base font-bold focus-visible:ring-0"
+                    />
+                  </div>
                 </div>
+                <SymbolPicker
+                  value={symbolX}
+                  onChange={setSymbolX}
+                  options={DEFAULT_SYMBOLS_X}
+                  ringClass="ring-player-x"
+                  label="Pick a symbol"
+                />
               </div>
 
-              <div className="rounded-2xl bg-player-o-soft p-4 flex items-center gap-3">
-                <Mark player="O" size="md" animate={false} />
-                <div className="flex-1">
-                  <Label htmlFor="nameO" className="text-xs font-bold uppercase text-foreground/60">
-                    Player O
-                  </Label>
-                  <Input
-                    id="nameO"
-                    value={nameO}
-                    maxLength={20}
-                    onChange={(e) => setNameO(e.target.value)}
-                    className="border-0 bg-transparent shadow-none px-0 text-base font-bold focus-visible:ring-0"
-                  />
+              <div className="rounded-2xl bg-player-o-soft p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Mark player="O" size="md" animate={false} symbol={symbolO} />
+                  <div className="flex-1">
+                    <Label htmlFor="nameO" className="text-xs font-bold uppercase text-foreground/60">
+                      Player 2
+                    </Label>
+                    <Input
+                      id="nameO"
+                      value={nameO}
+                      maxLength={20}
+                      onChange={(e) => setNameO(e.target.value)}
+                      className="border-0 bg-transparent shadow-none px-0 text-base font-bold focus-visible:ring-0"
+                    />
+                  </div>
                 </div>
+                <SymbolPicker
+                  value={symbolO}
+                  onChange={setSymbolO}
+                  options={DEFAULT_SYMBOLS_O}
+                  ringClass="ring-player-o"
+                  label="Pick a symbol"
+                />
               </div>
             </div>
 
