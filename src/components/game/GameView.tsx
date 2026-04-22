@@ -88,6 +88,7 @@ export function GameView({
 
   const turnPlayer = state.currentPlayer;
   const turnInfo = turnPlayer === "X" ? playerX : playerO;
+  const symbols = { X: playerX.symbol ?? null, O: playerO.symbol ?? null };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
