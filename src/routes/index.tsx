@@ -146,10 +146,10 @@ function Home() {
                 emoji: "🌐",
               },
               {
-                title: "No Pressure",
-                desc: "No timers, no ads. Take all the time you need.",
+                title: "Play against a Bot",
+                desc: "Sharpen your skills solo against four AI difficulties — from gentle warmups to brutal.",
                 color: "bg-secondary/60",
-                emoji: "🌈",
+                emoji: "🤖",
               },
             ].map((f) => (
               <div
