@@ -262,11 +262,6 @@ function BotPlay() {
       onResign={() => {
         if (confirm("Reset the game?")) reset();
       }}
-      statusBanner={
-        botThinking && state.currentPlayer === botSeat && state.winner === null
-          ? `${botName} is thinking…`
-          : null
-      }
     />
   );
 }
