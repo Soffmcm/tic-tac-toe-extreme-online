@@ -29,7 +29,7 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-muted/85 backdrop-blur-[1px]"
+        className="absolute inset-0 z-10 flex items-center justify-center bg-muted/85 backdrop-blur-[1px]"
       >
         <span className="font-display text-3xl font-bold text-muted-foreground">—</span>
       </motion.div>
@@ -42,7 +42,7 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
       animate={{ scale: 1, rotate: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 280, damping: 16 }}
       className={cn(
-        "absolute inset-0 z-10 flex items-center justify-center rounded-2xl backdrop-blur-[1px]",
+        "absolute inset-0 z-10 flex items-center justify-center backdrop-blur-[1px]",
         bg,
       )}
     >
@@ -51,6 +51,13 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
   );
 }
 
+/**
+ * Classical Ultimate Tic-Tac-Toe board.
+ * - One outer square holding a 3×3 meta-grid drawn with THICK lines.
+ * - Each mini-board is a 3×3 of cells with THINNER lines.
+ * - Lines are achieved with borders so the look is clean and classical,
+ *   not a stack of tinted tiles.
+ */
 export function Board({ state, playerSeat, onMove, disabled = false }: BoardProps) {
   const myTurn = playerSeat === undefined ? true : playerSeat === state.currentPlayer;
   const interactive = !disabled && state.winner === null && (playerSeat === undefined || myTurn);
@@ -58,25 +65,34 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
   return (
     <div
       className={cn(
-        "grid grid-cols-3 gap-1.5 sm:gap-2 rounded-3xl bg-board-line/90 p-1.5 sm:p-2 shadow-pop",
+        "relative grid grid-cols-3 grid-rows-3 bg-board rounded-xl overflow-hidden",
         "aspect-square w-full max-w-[min(92vw,640px)]",
+        // Outer frame — thick, classical
+        "border-[3px] sm:border-4 border-board-line shadow-pop",
       )}
     >
       {state.boards.map((cells, boardIndex) => {
         const result = state.miniWinners[boardIndex];
         const active = isBoardActive(state, boardIndex);
         const highlight = interactive && active;
-        const ringColor =
-          state.currentPlayer === "X" ? "ring-player-x" : "ring-player-o";
+
+        const col = boardIndex % 3;
+        const row = Math.floor(boardIndex / 3);
+
+        // Thick meta-grid lines drawn as borders between mini-boards.
+        const metaBorders = cn(
+          col > 0 && "border-l-[3px] sm:border-l-4 border-l-board-line",
+          row > 0 && "border-t-[3px] sm:border-t-4 border-t-board-line",
+        );
 
         return (
           <div
             key={boardIndex}
             className={cn(
-              "relative grid grid-cols-3 gap-0.5 sm:gap-1 rounded-2xl bg-board p-1 sm:p-1.5 transition-all",
-              highlight && cn("ring-4 sm:ring-[6px] ring-offset-0", ringColor, "shadow-soft"),
-              !highlight && result === null && "opacity-95",
-              !highlight && result === null && interactive && "opacity-60",
+              "relative grid grid-cols-3 grid-rows-3 bg-board transition-colors",
+              metaBorders,
+              highlight && "bg-secondary/25",
+              !highlight && result === null && interactive && "bg-board",
             )}
           >
             <AnimatePresence>
@@ -86,6 +102,16 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
             {cells.map((cell, cellIndex) => {
               const legal =
                 interactive && isLegalMove(state, boardIndex, cellIndex);
+
+              const cCol = cellIndex % 3;
+              const cRow = Math.floor(cellIndex / 3);
+
+              // Thin mini-grid lines between cells within the mini-board.
+              const cellBorders = cn(
+                cCol > 0 && "border-l border-l-board-line/40",
+                cRow > 0 && "border-t border-t-board-line/40",
+              );
+
               return (
                 <button
                   key={cellIndex}
@@ -93,9 +119,10 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
                   disabled={!legal}
                   onClick={() => legal && onMove?.(boardIndex, cellIndex)}
                   className={cn(
-                    "group relative aspect-square rounded-md sm:rounded-lg bg-muted/60",
-                    "flex items-center justify-center transition-all",
-                    legal && "hover:bg-secondary/70 cursor-pointer active:scale-90",
+                    "group relative aspect-square",
+                    "flex items-center justify-center transition-colors",
+                    cellBorders,
+                    legal && "hover:bg-secondary/40 cursor-pointer active:scale-95",
                     !legal && "cursor-default",
                   )}
                   aria-label={`Mini-board ${boardIndex + 1}, cell ${cellIndex + 1}`}
@@ -106,7 +133,7 @@ export function Board({ state, playerSeat, onMove, disabled = false }: BoardProp
                     legal && (
                       <span
                         className={cn(
-                          "opacity-0 group-hover:opacity-30 transition-opacity",
+                          "opacity-0 group-hover:opacity-25 transition-opacity",
                         )}
                       >
                         <Mark player={state.currentPlayer} size="md" animate={false} />

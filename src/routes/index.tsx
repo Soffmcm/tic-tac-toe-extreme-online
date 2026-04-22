@@ -155,7 +155,7 @@ function Home() {
       </main>
 
       <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        Built with 💛 — Ultimate 3T ·{" "}
+        Made by <span className="font-bold text-foreground/80">Sofia Moura</span> · Ultimate 3T ·{" "}
         <Link to="/rules" className="hover:text-primary underline-offset-2 hover:underline">
           How to Play
         </Link>
