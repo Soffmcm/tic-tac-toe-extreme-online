@@ -28,7 +28,7 @@ function isBoardActive(state: GameState, boardIndex: number): boolean {
   return state.activeBoard === boardIndex;
 }
 
-function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
+function MiniBoardOverlay({ result, symbol }: { result: MiniBoardResult; symbol?: string | null }) {
   if (result === null) return null;
   if (result === "draw") {
     return (
@@ -53,7 +53,7 @@ function MiniBoardOverlay({ result }: { result: MiniBoardResult }) {
         bg,
       )}
     >
-      <Mark player={result} size="xl" />
+      <Mark player={result} size="xl" symbol={symbol} />
     </motion.div>
   );
 }
