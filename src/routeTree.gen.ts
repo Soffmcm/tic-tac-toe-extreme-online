@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlayOnlineRouteImport } from './routes/play.online'
 import { Route as PlayLocalRouteImport } from './routes/play.local'
+import { Route as PlayBotRouteImport } from './routes/play.bot'
 import { Route as PlayRoomCodeRouteImport } from './routes/play.$roomCode'
 
 const RulesRoute = RulesRouteImport.update({
@@ -47,6 +48,11 @@ const PlayLocalRoute = PlayLocalRouteImport.update({
   path: '/play/local',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayBotRoute = PlayBotRouteImport.update({
+  id: '/play/bot',
+  path: '/play/bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayRoomCodeRoute = PlayRoomCodeRouteImport.update({
   id: '/play/$roomCode',
   path: '/play/$roomCode',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/rules': typeof RulesRoute
   '/play/$roomCode': typeof PlayRoomCodeRoute
+  '/play/bot': typeof PlayBotRoute
   '/play/local': typeof PlayLocalRoute
   '/play/online': typeof PlayOnlineRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/rules': typeof RulesRoute
   '/play/$roomCode': typeof PlayRoomCodeRoute
+  '/play/bot': typeof PlayBotRoute
   '/play/local': typeof PlayLocalRoute
   '/play/online': typeof PlayOnlineRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/rules': typeof RulesRoute
   '/play/$roomCode': typeof PlayRoomCodeRoute
+  '/play/bot': typeof PlayBotRoute
   '/play/local': typeof PlayLocalRoute
   '/play/online': typeof PlayOnlineRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rules'
     | '/play/$roomCode'
+    | '/play/bot'
     | '/play/local'
     | '/play/online'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rules'
     | '/play/$roomCode'
+    | '/play/bot'
     | '/play/local'
     | '/play/online'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rules'
     | '/play/$roomCode'
+    | '/play/bot'
     | '/play/local'
     | '/play/online'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RulesRoute: typeof RulesRoute
   PlayRoomCodeRoute: typeof PlayRoomCodeRoute
+  PlayBotRoute: typeof PlayBotRoute
   PlayLocalRoute: typeof PlayLocalRoute
   PlayOnlineRoute: typeof PlayOnlineRoute
 }
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayLocalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play/bot': {
+      id: '/play/bot'
+      path: '/play/bot'
+      fullPath: '/play/bot'
+      preLoaderRoute: typeof PlayBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/play/$roomCode': {
       id: '/play/$roomCode'
       path: '/play/$roomCode'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RulesRoute: RulesRoute,
   PlayRoomCodeRoute: PlayRoomCodeRoute,
+  PlayBotRoute: PlayBotRoute,
   PlayLocalRoute: PlayLocalRoute,
   PlayOnlineRoute: PlayOnlineRoute,
 }
