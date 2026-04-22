@@ -3,33 +3,34 @@
  *
  * Clients never write directly anymore — they call these functions, which
  * verify the caller's identity and validate game logic before persisting.
+ *
+ * Identity is sent explicitly in the input:
+ *   - `seatToken` for guests (long-lived random per-browser token in localStorage)
+ *   - `accessToken` (Supabase JWT) for signed-in users
+ *
+ * The server validates the JWT before trusting the user_id derived from it.
  */
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const SeatTokenHeader = "x-seat-token";
-const AuthHeader = "authorization";
+interface ResolvedCaller {
+  userId: string | null;
+  seatToken: string | null;
+}
 
-/**
- * Resolve the caller's identity from request headers.
- * Returns the authenticated user_id (if a valid Supabase JWT is present)
- * and/or the seat token (sent by guests as x-seat-token).
- */
-async function resolveCaller(): Promise<{ userId: string | null; seatToken: string | null }> {
-  const seatToken = (getRequestHeader(SeatTokenHeader) || "").trim() || null;
-  const authHeader = getRequestHeader(AuthHeader) || "";
+async function resolveCaller(input: {
+  accessToken?: string;
+  seatToken?: string;
+}): Promise<ResolvedCaller> {
+  const seatToken = (input.seatToken ?? "").trim() || null;
   let userId: string | null = null;
-  if (authHeader.startsWith("Bearer ")) {
-    const token = authHeader.slice("Bearer ".length).trim();
-    if (token) {
-      try {
-        const { data } = await supabaseAdmin.auth.getUser(token);
-        userId = data?.user?.id ?? null;
-      } catch {
-        userId = null;
-      }
+  if (input.accessToken && input.accessToken.length > 0) {
+    try {
+      const { data } = await supabaseAdmin.auth.getUser(input.accessToken);
+      userId = data?.user?.id ?? null;
+    } catch {
+      userId = null;
     }
   }
   return { userId, seatToken };
@@ -44,14 +45,24 @@ const RoomCodeSchema = z
   .regex(/^[A-Z0-9-]+$/i, "Invalid room code");
 const RoomIdSchema = z.string().uuid();
 const BoardIndexSchema = z.number().int().min(0).max(8);
+const TokenSchema = z.string().max(128).optional();
 
 export const createRoomFn = createServerFn({ method: "POST" })
-  .inputValidator((input: { code: string; nickname: string }) => ({
-    code: RoomCodeSchema.parse(input.code).toUpperCase(),
-    nickname: NicknameSchema.parse(input.nickname),
-  }))
+  .inputValidator(
+    (input: {
+      code: string;
+      nickname: string;
+      seatToken?: string;
+      accessToken?: string;
+    }) => ({
+      code: RoomCodeSchema.parse(input.code).toUpperCase(),
+      nickname: NicknameSchema.parse(input.nickname),
+      seatToken: TokenSchema.parse(input.seatToken),
+      accessToken: TokenSchema.parse(input.accessToken),
+    }),
+  )
   .handler(async ({ data }) => {
-    const { userId, seatToken } = await resolveCaller();
+    const { userId, seatToken } = await resolveCaller(data);
     if (!userId && !seatToken) {
       throw new Error("Identity required");
     }
@@ -71,12 +82,21 @@ export const createRoomFn = createServerFn({ method: "POST" })
   });
 
 export const joinRoomFn = createServerFn({ method: "POST" })
-  .inputValidator((input: { roomId: string; nickname: string }) => ({
-    roomId: RoomIdSchema.parse(input.roomId),
-    nickname: NicknameSchema.parse(input.nickname),
-  }))
+  .inputValidator(
+    (input: {
+      roomId: string;
+      nickname: string;
+      seatToken?: string;
+      accessToken?: string;
+    }) => ({
+      roomId: RoomIdSchema.parse(input.roomId),
+      nickname: NicknameSchema.parse(input.nickname),
+      seatToken: TokenSchema.parse(input.seatToken),
+      accessToken: TokenSchema.parse(input.accessToken),
+    }),
+  )
   .handler(async ({ data }) => {
-    const { userId, seatToken } = await resolveCaller();
+    const { userId, seatToken } = await resolveCaller(data);
     if (!userId && !seatToken) {
       throw new Error("Identity required");
     }
@@ -100,15 +120,19 @@ export const makeMoveFn = createServerFn({ method: "POST" })
       expectedMoveCount: number;
       boardIndex: number;
       cellIndex: number;
+      seatToken?: string;
+      accessToken?: string;
     }) => ({
       roomId: RoomIdSchema.parse(input.roomId),
       expectedMoveCount: z.number().int().min(0).parse(input.expectedMoveCount),
       boardIndex: BoardIndexSchema.parse(input.boardIndex),
       cellIndex: BoardIndexSchema.parse(input.cellIndex),
+      seatToken: TokenSchema.parse(input.seatToken),
+      accessToken: TokenSchema.parse(input.accessToken),
     }),
   )
   .handler(async ({ data }) => {
-    const { userId, seatToken } = await resolveCaller();
+    const { userId, seatToken } = await resolveCaller(data);
     if (!userId && !seatToken) {
       throw new Error("Identity required");
     }
@@ -128,11 +152,15 @@ export const makeMoveFn = createServerFn({ method: "POST" })
   });
 
 export const resetGameFn = createServerFn({ method: "POST" })
-  .inputValidator((input: { roomId: string }) => ({
-    roomId: RoomIdSchema.parse(input.roomId),
-  }))
+  .inputValidator(
+    (input: { roomId: string; seatToken?: string; accessToken?: string }) => ({
+      roomId: RoomIdSchema.parse(input.roomId),
+      seatToken: TokenSchema.parse(input.seatToken),
+      accessToken: TokenSchema.parse(input.accessToken),
+    }),
+  )
   .handler(async ({ data }) => {
-    const { userId, seatToken } = await resolveCaller();
+    const { userId, seatToken } = await resolveCaller(data);
     if (!userId && !seatToken) {
       throw new Error("Identity required");
     }
@@ -151,14 +179,18 @@ export const resetGameFn = createServerFn({ method: "POST" })
 /**
  * Returns which seat (X / O) the caller occupies in the given room, if any.
  * Used by the client to know if they're a player or a spectator without
- * exposing the seat tokens.
+ * exposing the seat tokens to anyone but the holder.
  */
 export const getMySeatFn = createServerFn({ method: "POST" })
-  .inputValidator((input: { roomId: string }) => ({
-    roomId: RoomIdSchema.parse(input.roomId),
-  }))
+  .inputValidator(
+    (input: { roomId: string; seatToken?: string; accessToken?: string }) => ({
+      roomId: RoomIdSchema.parse(input.roomId),
+      seatToken: TokenSchema.parse(input.seatToken),
+      accessToken: TokenSchema.parse(input.accessToken),
+    }),
+  )
   .handler(async ({ data }) => {
-    const { userId, seatToken } = await resolveCaller();
+    const { userId, seatToken } = await resolveCaller(data);
     if (!userId && !seatToken) {
       return { seat: null as "X" | "O" | null };
     }
