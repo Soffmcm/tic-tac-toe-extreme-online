@@ -136,7 +136,7 @@ export function GameView({
               animate={{ y: 0, opacity: 1 }}
               className="flex items-center gap-2 text-sm sm:text-base font-bold"
             >
-              <Mark player={turnPlayer} size="sm" animate={false} />
+              <Mark player={turnPlayer} size="sm" animate={false} symbol={symbols[turnPlayer]} />
               <span>
                 {mySeat && mySeat === turnPlayer ? (
                   <span className="text-primary">Your turn</span>
