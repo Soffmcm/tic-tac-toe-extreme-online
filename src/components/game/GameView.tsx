@@ -268,11 +268,13 @@ function ScoreCard({
   score,
   isTurn,
   isMe,
+  symbol,
 }: {
   info: PlayerInfo;
   score: number;
   isTurn: boolean;
   isMe?: boolean;
+  symbol?: string | null;
 }) {
   const isX = info.player === "X";
   return (
@@ -281,7 +283,7 @@ function ScoreCard({
         isX ? "bg-player-x-soft" : "bg-player-o-soft"
       } ${isTurn ? "ring-2 ring-offset-1 ring-offset-background scale-[1.02] " + (isX ? "ring-player-x" : "ring-player-o") : "opacity-80"}`}
     >
-      <Mark player={info.player} size="sm" animate={false} />
+      <Mark player={info.player} size="sm" animate={false} symbol={symbol} />
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-bold text-foreground/60 leading-none">
           {isMe ? "You" : "Player"}
