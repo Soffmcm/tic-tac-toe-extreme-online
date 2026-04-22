@@ -29,8 +29,10 @@ export const Route = createFileRoute("/play/local")({
 
 function LocalPlay() {
   const [started, setStarted] = useState(false);
-  const [nameX, setNameX] = useState("Player X");
-  const [nameO, setNameO] = useState("Player O");
+  const [nameX, setNameX] = useState("Player 1");
+  const [nameO, setNameO] = useState("Player 2");
+  const [symbolX, setSymbolX] = useState<string>(DEFAULT_SYMBOLS_X[0]);
+  const [symbolO, setSymbolO] = useState<string>(DEFAULT_SYMBOLS_O[0]);
   const [state, setState] = useState<GameState>(() => createInitialState());
 
   const handleMove = (b: number, c: number) => {
