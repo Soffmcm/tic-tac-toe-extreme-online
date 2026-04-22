@@ -137,8 +137,8 @@ function LocalPlay() {
   return (
     <GameView
       state={state}
-      playerX={{ name: nameX || "Player X", player: "X" }}
-      playerO={{ name: nameO || "Player O", player: "O" }}
+      playerX={{ name: nameX || "Player 1", player: "X", symbol: symbolX }}
+      playerO={{ name: nameO || "Player 2", player: "O", symbol: symbolO }}
       onMove={handleMove}
       onNewGame={() => setState(createInitialState())}
       onResign={() => {
