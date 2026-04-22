@@ -77,18 +77,24 @@ function BotPlay() {
   const [playerName, setPlayerName] = useState("You");
   const [difficulty, setDifficulty] = useState<BotDifficulty>("medium");
   const [humanSeat, setHumanSeat] = useState<Player>("X");
+  const [humanSymbol, setHumanSymbol] = useState<string>(DEFAULT_SYMBOLS_X[0]);
   const [state, setState] = useState<GameState>(() => createInitialState());
   const botTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const botSeat: Player = humanSeat === "X" ? "O" : "X";
   const botName = `Bot · ${labelFor(difficulty)}`;
+  const botSymbol = "🤖";
+
+  // Symbol options + ring color follow the seat (X = red/coral, O = blue/teal).
+  const humanSymbolOptions = humanSeat === "X" ? DEFAULT_SYMBOLS_X : DEFAULT_SYMBOLS_O;
+  const humanRingClass = humanSeat === "X" ? "ring-player-x" : "ring-player-o";
 
   const playerX = humanSeat === "X"
-    ? { name: playerName || "You", player: "X" as const }
-    : { name: botName, player: "X" as const };
+    ? { name: playerName || "You", player: "X" as const, symbol: humanSymbol }
+    : { name: botName, player: "X" as const, symbol: botSymbol };
   const playerO = humanSeat === "O"
-    ? { name: playerName || "You", player: "O" as const }
-    : { name: botName, player: "O" as const };
+    ? { name: playerName || "You", player: "O" as const, symbol: humanSymbol }
+    : { name: botName, player: "O" as const, symbol: botSymbol };
 
   // Bot move loop: whenever it's the bot's turn and game isn't over, schedule a move.
   useEffect(() => {
