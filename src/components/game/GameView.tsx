@@ -12,6 +12,7 @@ import {
 } from "@/lib/game-engine";
 import { fireConfetti } from "@/lib/confetti";
 import { sfx } from "@/lib/sounds";
+import { DEFAULT_SYMBOLS, type SymbolMap } from "@/lib/symbols";
 
 interface PlayerInfo {
   name: string;
@@ -32,6 +33,8 @@ interface GameViewProps {
   waitingForOpponent?: boolean;
   /** Banner string for online status (e.g., "Opponent disconnected"). */
   statusBanner?: string | null;
+  /** Per-seat custom symbols. Defaults to classic X/O. */
+  symbols?: SymbolMap;
 }
 
 export function GameView({
@@ -45,6 +48,7 @@ export function GameView({
   inviteUrl,
   waitingForOpponent,
   statusBanner,
+  symbols = DEFAULT_SYMBOLS,
 }: GameViewProps) {
   const scores = countMiniBoardWins(state);
   const [copied, setCopied] = useState(false);
