@@ -31,12 +31,18 @@ export const Route = createFileRoute("/play/local")({
 
 function LocalPlay() {
   const [started, setStarted] = useState(false);
-  const [nameX, setNameX] = useState("Player X");
-  const [nameO, setNameO] = useState("Player O");
-  const [symbolX, setSymbolX] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
-  const [symbolO, setSymbolO] = useState<PlayerSymbol>(() => getStoredSymbol("O"));
+  const [nameX, setNameX] = useState("Player 1");
+  const [nameO, setNameO] = useState("Player 2");
+  const [symbolX, setSymbolX] = useState<PlayerSymbol>(null);
+  const [symbolO, setSymbolO] = useState<PlayerSymbol>(null);
   const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
+
+  // Load stored symbols after mount to avoid SSR/client hydration mismatch.
+  useEffect(() => {
+    setSymbolX(getStoredSymbol("X"));
+    setSymbolO(getStoredSymbol("O"));
+  }, []);
 
   const symbols: SymbolMap = { X: symbolX, O: symbolO };
 
