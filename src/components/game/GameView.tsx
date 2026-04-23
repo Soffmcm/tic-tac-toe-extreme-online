@@ -105,12 +105,14 @@ export function GameView({
           <div className="flex-1 grid grid-cols-2 gap-2 max-w-md">
             <ScoreCard
               info={playerX}
+              symbol={symbols.X}
               score={scores.X}
               isTurn={turnPlayer === "X" && !state.winner}
               isMe={mySeat === "X"}
             />
             <ScoreCard
               info={playerO}
+              symbol={symbols.O}
               score={scores.O}
               isTurn={turnPlayer === "O" && !state.winner}
               isMe={mySeat === "O"}
@@ -137,7 +139,7 @@ export function GameView({
               animate={{ y: 0, opacity: 1 }}
               className="flex items-center gap-2 text-sm sm:text-base font-bold"
             >
-              <Mark player={turnPlayer} size="sm" animate={false} />
+              <Mark player={turnPlayer} symbol={symbols[turnPlayer]} size="sm" animate={false} />
               <span>
                 {mySeat && mySeat === turnPlayer ? (
                   <span className="text-primary">Your turn</span>
@@ -162,6 +164,7 @@ export function GameView({
           playerSeat={mySeat ?? undefined}
           onMove={onMove}
           disabled={!!waitingForOpponent}
+          symbols={symbols}
         />
 
         {/* Bottom controls */}
@@ -223,7 +226,7 @@ export function GameView({
               ) : (
                 <>
                   <div className="flex justify-center mb-3">
-                    <Mark player={state.winner} size="xl" />
+                    <Mark player={state.winner} symbol={symbols[state.winner]} size="xl" />
                   </div>
                   <h2 className="font-display text-3xl font-bold mb-2">
                     {(state.winner === "X" ? playerX.name : playerO.name)} wins!
@@ -259,11 +262,13 @@ export function GameView({
 
 function ScoreCard({
   info,
+  symbol,
   score,
   isTurn,
   isMe,
 }: {
   info: PlayerInfo;
+  symbol?: import("@/lib/symbols").PlayerSymbol;
   score: number;
   isTurn: boolean;
   isMe?: boolean;
@@ -275,7 +280,7 @@ function ScoreCard({
         isX ? "bg-player-x-soft" : "bg-player-o-soft"
       } ${isTurn ? "ring-2 ring-offset-1 ring-offset-background scale-[1.02] " + (isX ? "ring-player-x" : "ring-player-o") : "opacity-80"}`}
     >
-      <Mark player={info.player} size="sm" animate={false} />
+      <Mark player={info.player} symbol={symbol ?? null} size="sm" animate={false} />
       <div className="min-w-0 flex-1">
         <div className="text-[11px] uppercase tracking-wide font-bold text-foreground/60 leading-none">
           {isMe ? "You" : "Player"}
