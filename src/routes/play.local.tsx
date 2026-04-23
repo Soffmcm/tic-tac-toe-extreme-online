@@ -75,7 +75,7 @@ function LocalPlay() {
                 <Mark player="X" symbol={symbolX} size="md" animate={false} />
                 <div className="flex-1">
                   <Label htmlFor="nameX" className="text-xs font-bold uppercase text-foreground/60">
-                    Player X
+                    Player 1
                   </Label>
                   <Input
                     id="nameX"
