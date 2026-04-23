@@ -1,10 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/game/Header";
 import { GameView } from "@/components/game/GameView";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getStoredNickname, setStoredNickname } from "@/lib/identity";
+import {
+  getStoredSymbol,
+  setStoredSymbol,
+  type PlayerSymbol,
+  type SymbolMap,
+} from "@/lib/symbols";
+import { SymbolPicker } from "@/components/game/SymbolPicker";
 import { getCallerIdentity } from "@/lib/api-client";
 import {
   joinRoomFn,
