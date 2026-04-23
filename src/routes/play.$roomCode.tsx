@@ -359,17 +359,58 @@ function OnlineGame() {
       : null;
 
   return (
-    <GameView
-      state={state}
-      mySeat={mySeat}
-      playerX={{ name: room.player_x_name || "Player X", player: "X" }}
-      playerO={{ name: room.player_o_name || "Player O", player: "O" }}
-      onMove={handleMove}
-      onNewGame={state.winner ? newGame : undefined}
-      onResign={undefined}
-      inviteUrl={inviteUrl}
-      waitingForOpponent={waitingForOpponent}
-    />
+    <>
+      <GameView
+        state={state}
+        mySeat={mySeat}
+        symbols={symbols}
+        playerX={{ name: room.player_x_name || "Player X", player: "X" }}
+        playerO={{ name: room.player_o_name || "Player O", player: "O" }}
+        onMove={handleMove}
+        onNewGame={state.winner ? newGame : undefined}
+        onResign={undefined}
+        inviteUrl={inviteUrl}
+        waitingForOpponent={waitingForOpponent}
+      />
+
+      {/* Floating "customize symbol" panel — only the viewer's seat. */}
+      <div className="fixed bottom-4 right-4 z-40 max-w-sm w-[calc(100%-2rem)]">
+        {showSymbols ? (
+          <div className="bg-card border border-border rounded-2xl shadow-pop p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs font-bold uppercase text-foreground/60">
+                Your symbol
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSymbols(false)}
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+              >
+                Close
+              </button>
+            </div>
+            <SymbolPicker
+              seat={mySeat}
+              value={symbols[mySeat]}
+              onChange={updateMySymbol}
+              compact
+            />
+          </div>
+        ) : (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowSymbols(true)}
+              className="rounded-full font-bold shadow-pop"
+            >
+              ✨ Symbol
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
