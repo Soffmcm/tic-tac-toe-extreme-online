@@ -85,6 +85,12 @@ function BotPlay() {
   const [state, setState] = useState<GameState>(() => createInitialState());
   const botTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Load stored symbols after mount to avoid SSR/client hydration mismatch.
+  useEffect(() => {
+    setHumanSymbol(getStoredSymbol("X"));
+    setBotSymbol(getStoredSymbol("bot"));
+  }, []);
+
   const botSeat: Player = humanSeat === "X" ? "O" : "X";
   const botName = `Bot · ${labelFor(difficulty)}`;
 
