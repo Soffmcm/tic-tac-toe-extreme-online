@@ -92,7 +92,7 @@ function OnlineLobby() {
   const joinRoom = async () => {
     const code = joinCode.trim().toUpperCase();
     if (!code) return;
-    const name = nickname.trim() || "Player O";
+    const name = nickname.trim() || "Player 2";
     setStoredNickname(name);
     setJoining(true);
     try {
