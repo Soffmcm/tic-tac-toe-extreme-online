@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
 import { GameView } from "@/components/game/GameView";
+import { SymbolPicker } from "@/components/game/SymbolPicker";
 import { applyMove, createInitialState, type GameState } from "@/lib/game-engine";
+import {
+  getStoredSymbol,
+  setStoredSymbol,
+  type PlayerSymbol,
+  type SymbolMap,
+} from "@/lib/symbols";
 
 export const Route = createFileRoute("/play/local")({
   head: () => ({
@@ -26,7 +33,12 @@ function LocalPlay() {
   const [started, setStarted] = useState(false);
   const [nameX, setNameX] = useState("Player X");
   const [nameO, setNameO] = useState("Player O");
+  const [symbolX, setSymbolX] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
+  const [symbolO, setSymbolO] = useState<PlayerSymbol>(() => getStoredSymbol("O"));
+  const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
+
+  const symbols: SymbolMap = { X: symbolX, O: symbolO };
 
   const handleMove = (b: number, c: number) => {
     const next = applyMove(state, b, c);
