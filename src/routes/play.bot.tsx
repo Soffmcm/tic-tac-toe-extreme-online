@@ -7,8 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
 import { GameView } from "@/components/game/GameView";
+import { SymbolPicker } from "@/components/game/SymbolPicker";
 import { applyMove, createInitialState, type GameState, type Player } from "@/lib/game-engine";
 import { chooseBotMove, type BotDifficulty } from "@/lib/bot";
+import {
+  getStoredSymbol,
+  setStoredSymbol,
+  type PlayerSymbol,
+  type SymbolMap,
+} from "@/lib/symbols";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/play/bot")({
@@ -72,6 +79,9 @@ function BotPlay() {
   const [playerName, setPlayerName] = useState("You");
   const [difficulty, setDifficulty] = useState<BotDifficulty>("medium");
   const [humanSeat, setHumanSeat] = useState<Player>("X");
+  const [humanSymbol, setHumanSymbol] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
+  const [botSymbol, setBotSymbol] = useState<PlayerSymbol>(() => getStoredSymbol("bot"));
+  const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
   const botTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -84,6 +94,12 @@ function BotPlay() {
   const playerO = humanSeat === "O"
     ? { name: playerName || "You", player: "O" as const }
     : { name: botName, player: "O" as const };
+
+  // Map seats → symbols based on who is human / bot.
+  const symbols: SymbolMap = {
+    X: humanSeat === "X" ? humanSymbol : botSymbol,
+    O: humanSeat === "O" ? humanSymbol : botSymbol,
+  };
 
   // Bot move loop: whenever it's the bot's turn and game isn't over, schedule a move.
   useEffect(() => {
@@ -150,7 +166,7 @@ function BotPlay() {
 
             {/* Name */}
             <div className="rounded-2xl bg-muted/50 p-4 flex items-center gap-3 mb-5">
-              <Mark player={humanSeat} size="md" animate={false} />
+              <Mark player={humanSeat} symbol={humanSymbol} size="md" animate={false} />
               <div className="flex-1">
                 <Label htmlFor="botPlayerName" className="text-xs font-bold uppercase text-foreground/60">
                   Your name
@@ -185,7 +201,12 @@ function BotPlay() {
                         : "opacity-60 hover:opacity-100",
                     )}
                   >
-                    <Mark player={p} size="sm" animate={false} />
+                    <Mark
+                      player={p}
+                      symbol={p === humanSeat ? humanSymbol : botSymbol}
+                      size="sm"
+                      animate={false}
+                    />
                     <span>{p === "X" ? "X (first)" : "O (second)"}</span>
                   </button>
                 ))}
@@ -224,6 +245,41 @@ function BotPlay() {
               </div>
             </div>
 
+            {/* Symbols */}
+            <div className="mb-6">
+              <button
+                type="button"
+                onClick={() => setShowSymbols((v) => !v)}
+                className="w-full text-center text-sm font-semibold text-primary hover:underline mb-3"
+              >
+                {showSymbols ? "Hide symbols" : "Customize symbols ✨"}
+              </button>
+              {showSymbols && (
+                <div className="space-y-4 border-t border-border pt-4">
+                  <SymbolPicker
+                    seat={humanSeat}
+                    label="Your symbol"
+                    value={humanSymbol}
+                    onChange={(v) => {
+                      setHumanSymbol(v);
+                      setStoredSymbol(humanSeat, v);
+                    }}
+                    compact
+                  />
+                  <SymbolPicker
+                    seat={botSeat}
+                    label="Bot symbol"
+                    value={botSymbol}
+                    onChange={(v) => {
+                      setBotSymbol(v);
+                      setStoredSymbol("bot", v);
+                    }}
+                    compact
+                  />
+                </div>
+              )}
+            </div>
+
             <Button
               onClick={() => {
                 setState(createInitialState());
@@ -252,6 +308,7 @@ function BotPlay() {
       state={state}
       playerX={playerX}
       playerO={playerO}
+      symbols={symbols}
       mySeat={humanSeat}
       onMove={handleMove}
       onNewGame={reset}

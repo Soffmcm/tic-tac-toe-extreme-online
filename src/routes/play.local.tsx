@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
 import { GameView } from "@/components/game/GameView";
+import { SymbolPicker } from "@/components/game/SymbolPicker";
 import { applyMove, createInitialState, type GameState } from "@/lib/game-engine";
+import {
+  getStoredSymbol,
+  setStoredSymbol,
+  type PlayerSymbol,
+  type SymbolMap,
+} from "@/lib/symbols";
 
 export const Route = createFileRoute("/play/local")({
   head: () => ({
@@ -26,7 +33,12 @@ function LocalPlay() {
   const [started, setStarted] = useState(false);
   const [nameX, setNameX] = useState("Player X");
   const [nameO, setNameO] = useState("Player O");
+  const [symbolX, setSymbolX] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
+  const [symbolO, setSymbolO] = useState<PlayerSymbol>(() => getStoredSymbol("O"));
+  const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
+
+  const symbols: SymbolMap = { X: symbolX, O: symbolO };
 
   const handleMove = (b: number, c: number) => {
     const next = applyMove(state, b, c);
@@ -54,7 +66,7 @@ function LocalPlay() {
 
             <div className="space-y-4">
               <div className="rounded-2xl bg-player-x-soft p-4 flex items-center gap-3">
-                <Mark player="X" size="md" animate={false} />
+                <Mark player="X" symbol={symbolX} size="md" animate={false} />
                 <div className="flex-1">
                   <Label htmlFor="nameX" className="text-xs font-bold uppercase text-foreground/60">
                     Player X
@@ -70,7 +82,7 @@ function LocalPlay() {
               </div>
 
               <div className="rounded-2xl bg-player-o-soft p-4 flex items-center gap-3">
-                <Mark player="O" size="md" animate={false} />
+                <Mark player="O" symbol={symbolO} size="md" animate={false} />
                 <div className="flex-1">
                   <Label htmlFor="nameO" className="text-xs font-bold uppercase text-foreground/60">
                     Player O
@@ -84,6 +96,39 @@ function LocalPlay() {
                   />
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setShowSymbols((v) => !v)}
+                className="w-full text-center text-sm font-semibold text-primary hover:underline"
+              >
+                {showSymbols ? "Hide symbols" : "Customize symbols ✨"}
+              </button>
+
+              {showSymbols && (
+                <div className="space-y-4 border-t border-border pt-4">
+                  <SymbolPicker
+                    seat="X"
+                    label="Player X symbol"
+                    value={symbolX}
+                    onChange={(v) => {
+                      setSymbolX(v);
+                      setStoredSymbol("X", v);
+                    }}
+                    compact
+                  />
+                  <SymbolPicker
+                    seat="O"
+                    label="Player O symbol"
+                    value={symbolO}
+                    onChange={(v) => {
+                      setSymbolO(v);
+                      setStoredSymbol("O", v);
+                    }}
+                    compact
+                  />
+                </div>
+              )}
             </div>
 
             <Button
@@ -114,6 +159,7 @@ function LocalPlay() {
       state={state}
       playerX={{ name: nameX || "Player X", player: "X" }}
       playerO={{ name: nameO || "Player O", player: "O" }}
+      symbols={symbols}
       onMove={handleMove}
       onNewGame={() => setState(createInitialState())}
       onResign={() => {
