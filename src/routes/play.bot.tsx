@@ -79,8 +79,8 @@ function BotPlay() {
   const [playerName, setPlayerName] = useState("You");
   const [difficulty, setDifficulty] = useState<BotDifficulty>("medium");
   const [humanSeat, setHumanSeat] = useState<Player>("X");
-  const [humanSymbol, setHumanSymbol] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
-  const [botSymbol, setBotSymbol] = useState<PlayerSymbol>(() => getStoredSymbol("bot"));
+  const [humanSymbol, setHumanSymbol] = useState<PlayerSymbol>(null);
+  const [botSymbol, setBotSymbol] = useState<PlayerSymbol>(null);
   const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
   const botTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
