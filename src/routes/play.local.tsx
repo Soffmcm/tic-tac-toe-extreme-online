@@ -115,7 +115,7 @@ function LocalPlay() {
                 <div className="space-y-4 border-t border-border pt-4">
                   <SymbolPicker
                     seat="X"
-                    label="Player X symbol"
+                    label="Player 1 symbol"
                     value={symbolX}
                     onChange={(v) => {
                       setSymbolX(v);
