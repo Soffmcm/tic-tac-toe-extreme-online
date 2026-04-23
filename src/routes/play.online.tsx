@@ -6,12 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/Header";
 import { Mark } from "@/components/game/Mark";
+import { SymbolPicker } from "@/components/game/SymbolPicker";
 import { supabase } from "@/integrations/supabase/client";
 import {
   generateRoomCode,
   getStoredNickname,
   setStoredNickname,
 } from "@/lib/identity";
+import {
+  getStoredSymbol,
+  setStoredSymbol,
+  type PlayerSymbol,
+} from "@/lib/symbols";
 import { getCallerIdentity } from "@/lib/api-client";
 import { createRoomFn } from "@/server/game.functions";
 import { toast } from "sonner";
@@ -37,6 +43,14 @@ function OnlineLobby() {
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
   const [authedUser, setAuthedUser] = useState<{ id: string; nickname: string } | null>(null);
+  const [symbolX, setSymbolX] = useState<PlayerSymbol>(null);
+  const [symbolO, setSymbolO] = useState<PlayerSymbol>(null);
+  const [showSymbols, setShowSymbols] = useState(false);
+
+  useEffect(() => {
+    setSymbolX(getStoredSymbol("X"));
+    setSymbolO(getStoredSymbol("O"));
+  }, []);
 
   useEffect(() => {
     setNickname(getStoredNickname(""));
