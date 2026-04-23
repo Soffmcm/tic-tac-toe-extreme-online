@@ -170,10 +170,49 @@ function OnlineLobby() {
             )}
           </div>
 
+          {/* Symbol customization (collapsible) */}
+          <div className="bg-card rounded-3xl p-5 shadow-pop border border-border mb-5">
+            <button
+              type="button"
+              onClick={() => setShowSymbols((v) => !v)}
+              className="w-full text-left text-sm font-semibold text-primary hover:underline"
+            >
+              {showSymbols ? "Hide symbol picker" : "Customize your symbol ✨"}
+            </button>
+            {showSymbols && (
+              <div className="space-y-4 mt-4 border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Pick the symbol you'll play with. If you create the room you'll be X;
+                  if you join one you'll be O.
+                </p>
+                <SymbolPicker
+                  seat="X"
+                  label="If you're X"
+                  value={symbolX}
+                  onChange={(v) => {
+                    setSymbolX(v);
+                    setStoredSymbol("X", v);
+                  }}
+                  compact
+                />
+                <SymbolPicker
+                  seat="O"
+                  label="If you're O"
+                  value={symbolO}
+                  onChange={(v) => {
+                    setSymbolO(v);
+                    setStoredSymbol("O", v);
+                  }}
+                  compact
+                />
+              </div>
+            )}
+          </div>
+
           {/* Create room */}
           <div className="bg-player-x-soft rounded-3xl p-6 shadow-pop mb-4">
             <div className="flex items-center gap-3 mb-3">
-              <Mark player="X" size="md" animate={false} />
+              <Mark player="X" symbol={symbolX} size="md" animate={false} />
               <div>
                 <div className="font-display text-xl font-bold">Create a room</div>
                 <div className="text-sm text-foreground/70">
@@ -195,7 +234,7 @@ function OnlineLobby() {
           {/* Join room */}
           <div className="bg-player-o-soft rounded-3xl p-6 shadow-pop">
             <div className="flex items-center gap-3 mb-3">
-              <Mark player="O" size="md" animate={false} />
+              <Mark player="O" symbol={symbolO} size="md" animate={false} />
               <div>
                 <div className="font-display text-xl font-bold">Join a room</div>
                 <div className="text-sm text-foreground/70">
