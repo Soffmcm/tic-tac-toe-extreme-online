@@ -146,7 +146,7 @@ export function GameView({
                 ) : (
                   <>
                     <span className={turnPlayer === "X" ? "text-player-x" : "text-player-o"}>
-                      {turnInfo.name}
+                      {turnPlayer === "X" ? "Player 1" : "Player 2"}
                     </span>
                     <span className="text-muted-foreground">'s turn</span>
                   </>
