@@ -125,7 +125,7 @@ function LocalPlay() {
                   />
                   <SymbolPicker
                     seat="O"
-                    label="Player O symbol"
+                    label="Player 2 symbol"
                     value={symbolO}
                     onChange={(v) => {
                       setSymbolO(v);
