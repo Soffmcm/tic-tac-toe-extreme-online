@@ -70,7 +70,7 @@ function OnlineLobby() {
   }, []);
 
   const createRoom = async () => {
-    const name = nickname.trim() || "Player X";
+    const name = nickname.trim() || "Player 1";
     if (!name) return;
     setStoredNickname(name);
     setCreating(true);
