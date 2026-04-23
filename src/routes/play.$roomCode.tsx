@@ -186,6 +186,69 @@ function OnlineGame() {
     return () => sub.subscription.unsubscribe();
   }, [room]);
 
+  // Symbol sync: each client owns the symbol for its own seat and broadcasts
+  // it to a per-room channel so the opponent sees it. New joiners ask for a
+  // sync and existing peers re-broadcast their current symbol.
+  useEffect(() => {
+    if (!room || !mySeat) return;
+    // Seed our seat with whatever this viewer last picked locally.
+    const myStored = getStoredSymbol(mySeat);
+    setSymbols((prev) => ({ ...prev, [mySeat]: myStored }));
+
+    const channel = supabase.channel(`symbols:${room.id}`, {
+      config: { broadcast: { self: false } },
+    });
+    symbolChannelRef.current = channel;
+
+    channel
+      .on("broadcast", { event: "symbol" }, ({ payload }) => {
+        const seat = payload?.seat as Player | undefined;
+        const value = payload?.value as PlayerSymbol | undefined;
+        if (seat === "X" || seat === "O") {
+          setSymbols((prev) => ({ ...prev, [seat]: value ?? null }));
+        }
+      })
+      .on("broadcast", { event: "sync_request" }, () => {
+        // Re-announce our own symbol so the new peer can see it.
+        channel.send({
+          type: "broadcast",
+          event: "symbol",
+          payload: { seat: mySeat, value: getStoredSymbol(mySeat) },
+        });
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          // Announce our current symbol and request the opponent's.
+          channel.send({
+            type: "broadcast",
+            event: "symbol",
+            payload: { seat: mySeat, value: myStored },
+          });
+          channel.send({
+            type: "broadcast",
+            event: "sync_request",
+            payload: { from: mySeat },
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+      symbolChannelRef.current = null;
+    };
+  }, [room, mySeat]);
+
+  const updateMySymbol = (value: PlayerSymbol) => {
+    if (!mySeat) return;
+    setSymbols((prev) => ({ ...prev, [mySeat]: value }));
+    setStoredSymbol(mySeat, value);
+    symbolChannelRef.current?.send({
+      type: "broadcast",
+      event: "symbol",
+      payload: { seat: mySeat, value },
+    });
+  };
+
   const claimOSeat = async (name: string) => {
     if (!room) return;
     setStoredNickname(name);
