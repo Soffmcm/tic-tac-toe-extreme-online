@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,12 +31,18 @@ export const Route = createFileRoute("/play/local")({
 
 function LocalPlay() {
   const [started, setStarted] = useState(false);
-  const [nameX, setNameX] = useState("Player X");
-  const [nameO, setNameO] = useState("Player O");
-  const [symbolX, setSymbolX] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
-  const [symbolO, setSymbolO] = useState<PlayerSymbol>(() => getStoredSymbol("O"));
+  const [nameX, setNameX] = useState("Player 1");
+  const [nameO, setNameO] = useState("Player 2");
+  const [symbolX, setSymbolX] = useState<PlayerSymbol>(null);
+  const [symbolO, setSymbolO] = useState<PlayerSymbol>(null);
   const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
+
+  // Load stored symbols after mount to avoid SSR/client hydration mismatch.
+  useEffect(() => {
+    setSymbolX(getStoredSymbol("X"));
+    setSymbolO(getStoredSymbol("O"));
+  }, []);
 
   const symbols: SymbolMap = { X: symbolX, O: symbolO };
 
@@ -69,7 +75,7 @@ function LocalPlay() {
                 <Mark player="X" symbol={symbolX} size="md" animate={false} />
                 <div className="flex-1">
                   <Label htmlFor="nameX" className="text-xs font-bold uppercase text-foreground/60">
-                    Player X
+                    Player 1
                   </Label>
                   <Input
                     id="nameX"
@@ -85,7 +91,7 @@ function LocalPlay() {
                 <Mark player="O" symbol={symbolO} size="md" animate={false} />
                 <div className="flex-1">
                   <Label htmlFor="nameO" className="text-xs font-bold uppercase text-foreground/60">
-                    Player O
+                    Player 2
                   </Label>
                   <Input
                     id="nameO"
@@ -109,7 +115,7 @@ function LocalPlay() {
                 <div className="space-y-4 border-t border-border pt-4">
                   <SymbolPicker
                     seat="X"
-                    label="Player X symbol"
+                    label="Player 1 symbol"
                     value={symbolX}
                     onChange={(v) => {
                       setSymbolX(v);
@@ -119,7 +125,7 @@ function LocalPlay() {
                   />
                   <SymbolPicker
                     seat="O"
-                    label="Player O symbol"
+                    label="Player 2 symbol"
                     value={symbolO}
                     onChange={(v) => {
                       setSymbolO(v);
@@ -157,8 +163,8 @@ function LocalPlay() {
   return (
     <GameView
       state={state}
-      playerX={{ name: nameX || "Player X", player: "X" }}
-      playerO={{ name: nameO || "Player O", player: "O" }}
+      playerX={{ name: nameX || "Player 1", player: "X" }}
+      playerO={{ name: nameO || "Player 2", player: "O" }}
       symbols={symbols}
       onMove={handleMove}
       onNewGame={() => setState(createInitialState())}

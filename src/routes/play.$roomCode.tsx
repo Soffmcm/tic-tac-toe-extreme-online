@@ -364,8 +364,8 @@ function OnlineGame() {
         state={state}
         mySeat={mySeat}
         symbols={symbols}
-        playerX={{ name: room.player_x_name || "Player X", player: "X" }}
-        playerO={{ name: room.player_o_name || "Player O", player: "O" }}
+        playerX={{ name: room.player_x_name || "Player 1", player: "X" }}
+        playerO={{ name: room.player_o_name || "Player 2", player: "O" }}
         onMove={handleMove}
         onNewGame={state.winner ? newGame : undefined}
         onResign={undefined}
