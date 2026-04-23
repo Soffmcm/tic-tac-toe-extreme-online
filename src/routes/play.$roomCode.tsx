@@ -90,6 +90,12 @@ function OnlineGame() {
   const [mySeat, setMySeat] = useState<Player | null>(null);
   const seatLoadedRef = useRef(false);
 
+  // Per-seat symbols. Each client owns its own seat's symbol and broadcasts it
+  // to the room channel; we mirror the opponent's symbol when they announce it.
+  const [symbols, setSymbols] = useState<SymbolMap>({ X: null, O: null });
+  const [showSymbols, setShowSymbols] = useState(false);
+  const symbolChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
   const oSeatTaken = !!room?.player_o_id || !!room?.player_o_name;
   const waitingForOpponent = !!room && !oSeatTaken;
 
