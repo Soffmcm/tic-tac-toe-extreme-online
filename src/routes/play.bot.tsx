@@ -79,6 +79,9 @@ function BotPlay() {
   const [playerName, setPlayerName] = useState("You");
   const [difficulty, setDifficulty] = useState<BotDifficulty>("medium");
   const [humanSeat, setHumanSeat] = useState<Player>("X");
+  const [humanSymbol, setHumanSymbol] = useState<PlayerSymbol>(() => getStoredSymbol("X"));
+  const [botSymbol, setBotSymbol] = useState<PlayerSymbol>(() => getStoredSymbol("bot"));
+  const [showSymbols, setShowSymbols] = useState(false);
   const [state, setState] = useState<GameState>(() => createInitialState());
   const botTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,6 +94,12 @@ function BotPlay() {
   const playerO = humanSeat === "O"
     ? { name: playerName || "You", player: "O" as const }
     : { name: botName, player: "O" as const };
+
+  // Map seats → symbols based on who is human / bot.
+  const symbols: SymbolMap = {
+    X: humanSeat === "X" ? humanSymbol : botSymbol,
+    O: humanSeat === "O" ? humanSymbol : botSymbol,
+  };
 
   // Bot move loop: whenever it's the bot's turn and game isn't over, schedule a move.
   useEffect(() => {
